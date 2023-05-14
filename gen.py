@@ -29,7 +29,7 @@ def text2audio(text, duration, audio_path, guidance_scale, random_seed, n_candid
     waveform = waveform[0]
   return waveform
 
-def setup_args() -> (str, str):
+def setup_args() -> (str, str, str):
   parser = argparse.ArgumentParser(
                     prog='audiogen',
                     description='generates audio using AudioLDM and writes it to out.wav',
