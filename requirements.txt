@@ -6,3 +6,4 @@ scipy
 numpy
 audioldm
 argparse
+tqdm

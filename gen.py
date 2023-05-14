@@ -1,8 +1,10 @@
 import os
+import requests
 import scipy.io.wavfile as wavf
-import torch
 import soundfile as sf
 import argparse
+from tqdm import tqdm
+from urllib.request import urlopen
 from audioldm import text_to_audio, style_transfer, super_resolution_and_inpainting, build_model, latent_diffusion
 
 ckpt_urls = {
@@ -29,7 +31,21 @@ def text2audio(text, duration, audio_path, guidance_scale, random_seed, n_candid
     waveform = waveform[0]
   return waveform
 
-def setup_args() -> (str, str, str):
+def download_ckpt(ckpt_url, ckpt_path):
+  print("no .ckpt file found, downloading from zenodo...") 
+  response = requests.get(ckpt_url, stream=True, allow_redirects=True)
+  total_size_in_bytes= int(response.headers.get('content-length', 0))
+  block_size = 1024 #1 Kibibyte
+  progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+  with open(ckpt_path, 'wb') as f:
+    for data in response.iter_content(block_size):
+      progress_bar.update(len(data))
+      f.write(data)
+  progress_bar.close()
+  if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+    raise RuntimeError("Failed to download ckpt file.")
+
+def setup_args():
   parser = argparse.ArgumentParser(
                     prog='audiogen',
                     description='generates audio using AudioLDM and writes it to out.wav',
@@ -42,13 +58,12 @@ def setup_args() -> (str, str, str):
   args = parser.parse_args()
   return (args.checkpoint, args.input_file, args.output_file)
 
-
 if __name__ == '__main__':
   (use_checkpoint, input_file, output_file) = setup_args()
   ckpt_path = "./ckpt/" + use_checkpoint + ".ckpt"
   if not os.path.exists(ckpt_path):
-    r = requests.get(ckpt_urls[use_checkpoint], allow_redirects=True)
-    open(ckpt_path, 'wb').write(r.content)
+    download_ckpt(ckpt_urls[use_checkpoint], ckpt_path)
+    
   audioldm = build_model(ckpt_path=ckpt_path, model_name=use_checkpoint)
   sr = 16000 # sample rate
 
