@@ -31,7 +31,7 @@ def text2audio(text, duration, audio_path, guidance_scale, random_seed, n_candid
     waveform = waveform[0]
   return waveform
 
-def download_ckpt(ckpt_url, ckpt_path):
+def download_ckpt(ckpt_url: str, ckpt_path: str) -> None:
   print("no .ckpt file found, downloading from zenodo...") 
   response = requests.get(ckpt_url, stream=True, allow_redirects=True)
   total_size_in_bytes= int(response.headers.get('content-length', 0))
@@ -45,27 +45,27 @@ def download_ckpt(ckpt_url, ckpt_path):
   if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
     raise RuntimeError("Failed to download ckpt file.")
 
-def setup_args():
+def setup_args() -> argparse.ArgumentParser:
   parser = argparse.ArgumentParser(
                     prog='audiogen',
                     description='generates audio using AudioLDM and writes it to out.wav',
                     epilog='~tejas')
   parser.add_argument('-c', '--checkpoint', default="audioldm-m-full", 
-                      choices=["audioldm-s-full", "audioldm-full-l", "audioldm-full-s-v2", "audioldm-m-text-ft", "audioldm-s-text-ft", "audioldm-m-full"])
+                      choices=["audioldm-s-full", "audioldm-full-l", "audioldm-full-s-v2", 
+                               "audioldm-m-text-ft", "audioldm-s-text-ft", "audioldm-m-full"])
   parser.add_argument('-i', '--input_file', required=True)
   parser.add_argument('-o', '--output_file', default="out.wav")
 
-  args = parser.parse_args()
-  return (args.checkpoint, args.input_file, args.output_file)
+  return parser.parse_args()
 
 if __name__ == '__main__':
-  (use_checkpoint, input_file, output_file) = setup_args()
-  ckpt_path = "./ckpt/" + use_checkpoint + ".ckpt"
+  args = setup_args()
+  ckpt_path = "./ckpt/" + args.checkpoint + ".ckpt"
   if not os.path.exists(ckpt_path):
-    download_ckpt(ckpt_urls[use_checkpoint], ckpt_path)
-    
-  audioldm = build_model(ckpt_path=ckpt_path, model_name=use_checkpoint)
+    download_ckpt(ckpt_urls[args.checkpoint], ckpt_path)
+
+  audioldm = build_model(ckpt_path=ckpt_path, model_name=args.checkpoint)
   sr = 16000 # sample rate
 
-  generated_audio = text2audio('placeholder', duration=20, audio_path=input_file, guidance_scale=7, random_seed=0, n_candidates=3, steps=200)
-  sf.write(output_file, generated_audio.T, sr, subtype='PCM_24')
+  generated_audio = text2audio('placeholder', duration=20, audio_path=args.input_file, guidance_scale=7, random_seed=0, n_candidates=3, steps=200)
+  sf.write(args.output_file, generated_audio.T, sr, subtype='PCM_24')
