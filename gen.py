@@ -16,9 +16,9 @@ ckpt_urls = {
   "audioldm-m-full": "https://zenodo.org/record/7813012/files/audioldm-m-full.ckpt"
 }
 
-def text2audio(text, duration, audio_path, guidance_scale, random_seed, n_candidates, steps):
+def text2audio(model, text, duration, audio_path, guidance_scale, random_seed, n_candidates, steps):
   waveform = text_to_audio(
-    audioldm,
+    model,
     text,
     audio_path,
     random_seed,
@@ -67,5 +67,5 @@ if __name__ == '__main__':
   audioldm = build_model(ckpt_path=ckpt_path, model_name=args.checkpoint)
   sr = 16000 # sample rate
 
-  generated_audio = text2audio('placeholder', duration=20, audio_path=args.input_file, guidance_scale=7, random_seed=0, n_candidates=3, steps=200)
+  generated_audio = text2audio(audioldm, 'placeholder', duration=20, audio_path=args.input_file, guidance_scale=7, random_seed=0, n_candidates=3, steps=200)
   sf.write(args.output_file, generated_audio.T, sr, subtype='PCM_24')

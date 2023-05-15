@@ -11,3 +11,7 @@ some gcloud commands are required to install the nvidia drivers, ssh to the inst
   -  `curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py --output install_gpu_driver.py`
   -  `python3 install_gpu_driver.py`
 
+
+## to-do
+
+setup Redis task queue and have background process running which polls queue for new audio generation requests

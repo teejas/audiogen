@@ -1,13 +1,14 @@
 #!/bin/bash
 
-sudo apt-get update -y && sudo apt-get install -y python3 python3-pip ffmpeg # ffmpeg necessary for passing mp3 to audioLDM
+sudo apt-get update -y && sudo apt-get install -y python3 python3-pip redis ffmpeg # ffmpeg necessary for passing mp3 to audioLDM
 alias python=python3
 alias pip=pip3
 
 # install python dependencies
 pip install -r requirements.txt
 
-# next 2 lines install the m-full ckpt file, for the medium sized pre-trained model. Paths to other ckpt files can be found in the readme
+# next 2 LOC download the m-full ckpt file, for the default medium sized pre-trained model
+# `gen.py` will download ckpt files as needed.
 mkdir ./ckpt
 wget https://zenodo.org/record/7813012/files/audioldm-m-full.ckpt -O ./ckpt/audioldm-m-full.ckpt
 
